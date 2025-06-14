@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 import { Metadata, Viewport } from "next";
 import {
   APP_DESCRIPTION,
+  APP_EMOJI,
   APP_FRAME_VERSION,
   APP_IMAGE,
   APP_NAME,
@@ -63,6 +64,12 @@ export const viewport: Viewport = {
 export default function RootLayout(props: PropsWithChildren) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="icon"
+          href={`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${APP_EMOJI}</text></svg>`}
+        />
+      </head>
       <body className={`antialiased`}>
         <Providers>
           <Layout>{props.children}</Layout>

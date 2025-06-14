@@ -14,9 +14,11 @@ export const APP_FRAME_PRIMARY_CATEGORY = "utility";
 export const APP_FRAME_TAGS = ["farcaster", "app"];
 
 export const FARCASTER_ACCOUNT_ASSOCIATION = {
-  header: "",
-  payload: "",
-  signature: "",
+  header:
+    "eyJmaWQiOjEyNTgwLCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4NTQzOTY4YzU4YTRlYTEyNTllMTIxOUI2MjE5MjBDMjQ2OTMxRGYxRiJ9",
+  payload: "eyJkb21haW4iOiJjYXN0cGFzcy5uZXh0aC5kZXYifQ",
+  signature:
+    "MHg4ODVjN2U0MDg1MDI5YWQyOGE3NjVlMzkxMGI4ZjZlZWU0NWEyZWZmYWEzNmY3ZTJjNjBkYzg0Y2U1N2I5MDIzN2U4NGJiOTllM2Y4MGM3OTQzOTJjZWIxMTAzZTljMjA4YmQ4MjA5NzUxOTQwYTgxMmQzN2QyYzY4NTYzOGI1NzFj",
 };
 
 export const SOCIAL_TWITTER = "wslyvh";
