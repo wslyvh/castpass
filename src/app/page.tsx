@@ -1,3 +1,9 @@
+import { VerifyEmail } from "@/components/verify";
+
 export default function Home() {
-  return <div>Hello World</div>;
+  return (
+    <div>
+      <VerifyEmail />
+    </div>
+  );
 }
