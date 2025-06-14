@@ -23,11 +23,13 @@ export async function sendEmailVerification({
     return { success: false, error: "Resend client not configured." };
   }
 
+  const domain = email.split("@")[1];
+
   try {
     await resend.emails.send({
       from: resendFromEmail,
       to: email,
-      subject: "Castpass verification",
+      subject: `Castpass verification: ${domain}`,
       react: EmailTemplate({ name, email }),
     });
 
