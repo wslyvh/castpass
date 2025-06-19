@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useFarcasterContext } from "./useFarcasterContext";
 
-const DEFAULT_CACHE_TIME = 1000 * 60 * 5; // 5 minutes
-
 export function useFarcasterChannels(fid?: number, enabled: boolean = true) {
   const context = useFarcasterContext(enabled);
   fid = fid ?? context.data?.user?.fid;
@@ -17,7 +15,10 @@ export function useFarcasterChannels(fid?: number, enabled: boolean = true) {
 
       return data;
     },
-    staleTime: DEFAULT_CACHE_TIME,
+    staleTime: 0,
     enabled: enabled && !!fid,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 }

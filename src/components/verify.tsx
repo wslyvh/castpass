@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import zkeSDK, { Proof } from "@zk-email/sdk";
 import { DomainChannels } from "@/utils/channels";
 import { useFarcasterChannels } from "@/hooks/useFarcasterChannels";
@@ -13,7 +13,17 @@ export function VerifyEmail() {
   const [loading, setLoading] = useState(false);
   const [proof, setProof] = useState<Proof | null>(null);
   const [availableChannels, setAvailableChannels] = useState<string[]>([]);
-  const { data: channels } = useFarcasterChannels();
+  const [channelInvited, setChannelInvited] = useState(false);
+  const { data: channels, refetch } = useFarcasterChannels();
+
+  useEffect(() => {
+    if (!channels || channels.length === 0) {
+      const interval = setInterval(() => {
+        refetch();
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [channels, refetch]);
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -84,6 +94,8 @@ export function VerifyEmail() {
           type: "success",
           message: "Invite sent 🎉",
         });
+
+        setChannelInvited(true);
       }
 
       if (data.error) {
@@ -91,12 +103,14 @@ export function VerifyEmail() {
           type: "error",
           message: data.error,
         });
+        setChannelInvited(false);
       }
     } catch (error: any) {
       setAlert({
         type: "error",
         message: error?.message || "Error inviting to channel.",
       });
+      setChannelInvited(false);
     }
   }
 
@@ -138,7 +152,17 @@ export function VerifyEmail() {
                   <div>
                     <h4 className="font-semibold">{channel}</h4>
                   </div>
-                  {isMember ? (
+                  {isMember && channelInvited && (
+                    <a
+                      href={`https://farcaster.xyz/~/channel/${channel}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline btn-primary"
+                    >
+                      Invited
+                    </a>
+                  )}
+                  {isMember && !channelInvited ? (
                     <button
                       className="btn btn-primary"
                       onClick={() => joinChannel(channel)}
