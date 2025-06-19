@@ -66,11 +66,8 @@ export async function getChannel(channelId: string) {
   return data.result.channel;
 }
 
-export async function followChannel(
-  authToken: string,
-  channelId: string,
-  follow: boolean = true
-) {
+export async function followChannel(channelId: string, follow: boolean = true) {
+  const authToken = await getAuthToken();
   const method = follow ? "POST" : "DELETE";
   const res = await fetch("https://api.farcaster.xyz/fc/channel-follows", {
     method,
@@ -89,11 +86,8 @@ export async function followChannel(
   return data;
 }
 
-export async function inviteToChannel(
-  authToken: string,
-  channelId: string,
-  fid: number
-) {
+export async function inviteToChannel(channelId: string, fid: number) {
+  const authToken = await getAuthToken();
   const res = await fetch("https://api.farcaster.xyz/fc/channel-invites", {
     method: "POST",
     headers: {
@@ -109,4 +103,28 @@ export async function inviteToChannel(
 
   const data = await res.json();
   return data;
+}
+
+export async function fetchAllUserChannels(fid: number) {
+  console.log("fetching all user channels for fid", fid);
+  let channels: any[] = [];
+  let cursor = "";
+
+  do {
+    let url = `https://api.farcaster.xyz/v1/user-following-channels?fid=${fid}`;
+    if (cursor) url += `&cursor=${cursor}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.result?.channels) {
+        channels = channels.concat(data.result.channels);
+      }
+      cursor = data.next?.cursor;
+    } else {
+      console.error("Failed to fetch channels", res.status, res.statusText);
+      break;
+    }
+  } while (cursor);
+
+  return channels;
 }

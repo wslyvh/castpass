@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import zkeSDK, { Proof } from "@zk-email/sdk";
+import { DomainChannels } from "@/utils/channels";
+import { useFarcasterChannels } from "@/hooks/useFarcasterChannels";
 
 export function VerifyEmail() {
   const [alert, setAlert] = useState<{
@@ -10,6 +12,8 @@ export function VerifyEmail() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [proof, setProof] = useState<Proof | null>(null);
+  const [availableChannels, setAvailableChannels] = useState<string[]>([]);
+  const { data: channels } = useFarcasterChannels();
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -18,6 +22,7 @@ export function VerifyEmail() {
     setLoading(true);
     setAlert(null);
     setProof(null);
+    setAvailableChannels([]);
 
     try {
       const eml = await file.text();
@@ -31,13 +36,29 @@ export function VerifyEmail() {
       setAlert({ type: "success", message: "Proof generated successfully!" });
 
       const verification = await blueprint.verifyProof(proof);
-      console.log("verification", verification);
-      setAlert({
-        type: verification ? "success" : "error",
-        message: verification
-          ? "Proof verified!"
-          : "Proof verification failed.",
-      });
+      if (verification) {
+        setAlert({
+          type: "success",
+          message: "Proof verified 🎉",
+        });
+
+        const verifiedDomains = proof.props.publicData?.domain;
+        if (verifiedDomains) {
+          const channels = Object.entries(DomainChannels)
+            .filter(([_, domains]: [string, string[]]) =>
+              Array.isArray(verifiedDomains)
+                ? verifiedDomains.some((domain) => domains.includes(domain))
+                : domains.includes(verifiedDomains)
+            )
+            .map(([channel]) => channel);
+          setAvailableChannels(channels);
+        }
+      } else {
+        setAlert({
+          type: "error",
+          message: "Proof verification failed.",
+        });
+      }
     } catch (error: any) {
       setAlert({
         type: "error",
@@ -45,6 +66,37 @@ export function VerifyEmail() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function joinChannel(channelId: string) {
+    try {
+      const res = await fetch(
+        `/api/channels?fid=12580&channelId=${channelId}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const data = await res.json();
+      if (data.ok) {
+        setAlert({
+          type: "success",
+          message: "Invite sent 🎉",
+        });
+      }
+
+      if (data.error) {
+        setAlert({
+          type: "error",
+          message: data.error,
+        });
+      }
+    } catch (error: any) {
+      setAlert({
+        type: "error",
+        message: error?.message || "Error inviting to channel.",
+      });
     }
   }
 
@@ -58,28 +110,81 @@ export function VerifyEmail() {
         onChange={handleFileUpload}
         disabled={loading}
       />
+
       {loading && <p>Generating proof...</p>}
-      {alert && (
-        <div className="mt-4">
-          <div className={`alert alert-${alert.type}`}>
+
+      {/* Available Channels Section */}
+      {alert && availableChannels.length > 0 && (
+        <div className="mt-6 p-4 border rounded-lg bg-green-50">
+          <div className={`alert alert-${alert.type} mb-4`}>
             <span>{alert.message}</span>
           </div>
-        </div>
-      )}
-      {proof && (
-        <div className="mt-4 flex flex-col gap-2">
-          <h3 className="font-bold">Proof Generated:</h3>
-          <pre className="overflow-x-auto bg-gray-100 p-2 rounded text-xs">
-            {JSON.stringify(proof.props.proofData, null, 2)}
-          </pre>
 
-          <h3 className="font-bold">Public outputs</h3>
-          <pre className="overflow-x-auto bg-gray-100 p-2 rounded text-xs">
-            {JSON.stringify(proof.props.publicData, null, 2)}
-          </pre>
-
-          <h3 className="font-bold">Domain</h3>
-          <p>{proof.props.publicData?.domain}</p>
+          <h3 className="text-xl font-bold mb-3"> Channels you can join</h3>
+          <p className="text-gray-600 mb-4">
+            Based on your verified domain ({proof?.props.publicData?.domain}),
+            you can join these Farcaster channels:
+          </p>
+          <div className="space-y-3">
+            {availableChannels.map((channel) => {
+              const isMember = Array.isArray(channels)
+                ? channels.some((c: any) => c.id === channel)
+                : false;
+              return (
+                <div
+                  key={channel}
+                  className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                >
+                  <div>
+                    <h4 className="font-semibold">{channel}</h4>
+                  </div>
+                  {isMember ? (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => joinChannel(channel)}
+                    >
+                      Request Invite
+                    </button>
+                  ) : (
+                    <a
+                      href={`https://farcaster.xyz/~/channel/${channel}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline btn-primary"
+                    >
+                      Follow Channel
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {proof && (
+            <button
+              className="mt-6 btn btn-outline btn-primary"
+              onClick={() => {
+                const proofJson = {
+                  public: {
+                    domain: Array.isArray(proof?.props.publicData?.domain)
+                      ? proof.props.publicData.domain
+                      : [proof?.props.publicData?.domain],
+                  },
+                  proof: proof?.props.proofData,
+                };
+                const dataStr =
+                  "data:text/json;charset=utf-8," +
+                  encodeURIComponent(JSON.stringify(proofJson, null, 2));
+                const downloadAnchorNode = document.createElement("a");
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "proof.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+              }}
+            >
+              Download Proof as JSON
+            </button>
+          )}
         </div>
       )}
     </div>
