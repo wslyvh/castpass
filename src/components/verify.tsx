@@ -45,7 +45,7 @@ export function VerifyEmail() {
         const verifiedDomains = proof.props.publicData?.domain;
         if (verifiedDomains) {
           const channels = Object.entries(DomainChannels)
-            .filter(([_, domains]: [string, string[]]) =>
+            .filter(([, domains]: [string, string[]]) =>
               Array.isArray(verifiedDomains)
                 ? verifiedDomains.some((domain) => domains.includes(domain))
                 : domains.includes(verifiedDomains)

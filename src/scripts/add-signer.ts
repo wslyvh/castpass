@@ -35,15 +35,15 @@ async function main() {
   const key = "0x" + Buffer.from(publicKeyBytes).toString("hex");
 
   // 2. Generate Signed Key Request signature
-  const account = mnemonicToAccount(APP_MNEMONIC);
+  const account = mnemonicToAccount(APP_MNEMONIC as string);
   const deadline = Math.floor(Date.now() / 1000) + 86400; // 24h
   const signature = await account.signTypedData({
     domain: SIGNED_KEY_REQUEST_VALIDATOR_EIP_712_DOMAIN,
     types: { SignedKeyRequest: SIGNED_KEY_REQUEST_TYPE },
     primaryType: "SignedKeyRequest",
     message: {
-      requestFid: BigInt(APP_FID),
-      key,
+      requestFid: BigInt(APP_FID as string),
+      key: key as `0x${string}`,
       deadline: BigInt(deadline),
     },
   });
