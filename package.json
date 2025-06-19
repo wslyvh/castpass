@@ -7,10 +7,13 @@
     "tunnel": "ngrok http 3000 --log=stdout",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "signer": "npx tsx src/scripts/add-signer.ts",
+    "channels": "npx tsx src/scripts/manage-channels.ts"
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.41",
+    "@farcaster/hub-nodejs": "^0.14.1",
     "@tanstack/react-query": "^5.76.1",
     "@upstash/redis": "^1.34.9",
     "@zk-email/sdk": "^1.0.3",
@@ -25,14 +28,19 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@noble/ed25519": "^2.3.0",
+    "@noble/hashes": "^1.8.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "daisyui": "^5.0.35",
+    "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
+    "qr": "^0.5.0",
     "tailwindcss": "^4",
+    "tsx": "^4.20.3",
     "typescript": "^5"
   }
 }
