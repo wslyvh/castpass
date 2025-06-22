@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useFarcasterContext } from "./useFarcasterContext";
+import { useFarcasterAccount } from "./useFarcasterAccount";
 
 export function useFarcasterChannels(fid?: number, enabled: boolean = true) {
-  const context = useFarcasterContext(enabled);
-  fid = fid ?? context.data?.user?.fid;
+  const { data: user } = useFarcasterAccount(enabled);
+  fid = fid ?? user?.fid;
 
   return useQuery({
     queryKey: ["farcaster", "channels", fid],
@@ -11,9 +11,7 @@ export function useFarcasterChannels(fid?: number, enabled: boolean = true) {
       if (!fid) throw new Error("No fid available");
 
       const res = await fetch(`/api/channels?fid=${fid}`);
-      const data = await res.json();
-
-      return data;
+      return res.json();
     },
     staleTime: 0,
     enabled: enabled && !!fid,

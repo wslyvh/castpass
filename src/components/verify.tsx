@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import zkeSDK, { Proof } from "@zk-email/sdk";
 import { DomainChannels } from "@/utils/channels";
 import { useFarcasterChannels } from "@/hooks/useFarcasterChannels";
+import { useFarcasterAccount } from "@/hooks/useFarcasterAccount";
 
 export function VerifyEmail() {
   const [alert, setAlert] = useState<{
@@ -15,6 +16,7 @@ export function VerifyEmail() {
   const [availableChannels, setAvailableChannels] = useState<string[]>([]);
   const [channelInvited, setChannelInvited] = useState(false);
   const { data: channels, refetch } = useFarcasterChannels();
+  const { data: user } = useFarcasterAccount();
 
   useEffect(() => {
     if (!channels || channels.length === 0) {
@@ -80,9 +82,11 @@ export function VerifyEmail() {
   }
 
   async function joinChannel(channelId: string) {
+    if (!user?.fid) return;
+
     try {
       const res = await fetch(
-        `/api/channels?fid=12580&channelId=${channelId}`,
+        `/api/channels?fid=${user?.fid}&channelId=${channelId}`,
         {
           method: "POST",
         }
@@ -110,6 +114,7 @@ export function VerifyEmail() {
         type: "error",
         message: error?.message || "Error inviting to channel.",
       });
+
       setChannelInvited(false);
     }
   }
@@ -141,9 +146,7 @@ export function VerifyEmail() {
           </p>
           <div className="space-y-3">
             {availableChannels.map((channel) => {
-              const isMember = Array.isArray(channels)
-                ? channels.some((c: any) => c.id === channel)
-                : false;
+              const isMember = channels?.find((c: any) => c.id === channel);
               return (
                 <div
                   key={channel}
