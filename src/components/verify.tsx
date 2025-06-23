@@ -155,33 +155,22 @@ export function VerifyEmail() {
                   <div>
                     <h4 className="font-semibold">{channel}</h4>
                   </div>
-                  {isMember && channelInvited && (
+                  <div className="flex gap-2">
                     <a
                       href={`https://farcaster.xyz/~/channel/${channel}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-outline btn-primary"
                     >
-                      Invited
+                      Follow
                     </a>
-                  )}
-                  {isMember && !channelInvited ? (
                     <button
                       className="btn btn-primary"
                       onClick={() => joinChannel(channel)}
                     >
-                      Request Invite
+                      Join
                     </button>
-                  ) : (
-                    <a
-                      href={`https://farcaster.xyz/~/channel/${channel}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-outline btn-primary"
-                    >
-                      Follow Channel
-                    </a>
-                  )}
+                  </div>
                 </div>
               );
             })}
