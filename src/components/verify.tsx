@@ -14,7 +14,7 @@ export function VerifyEmail() {
   const [loading, setLoading] = useState(false);
   const [proof, setProof] = useState<Proof | null>(null);
   const [availableChannels, setAvailableChannels] = useState<string[]>([]);
-  const [channelInvited, setChannelInvited] = useState(false);
+  // const [channelInvited, setChannelInvited] = useState(false);
   const { data: channels, refetch } = useFarcasterChannels();
   const { data: user } = useFarcasterAccount();
 
@@ -99,7 +99,7 @@ export function VerifyEmail() {
           message: "Invite sent 🎉",
         });
 
-        setChannelInvited(true);
+        // setChannelInvited(true);
       }
 
       if (data.error) {
@@ -107,7 +107,8 @@ export function VerifyEmail() {
           type: "error",
           message: data.error,
         });
-        setChannelInvited(false);
+
+        // setChannelInvited(false);
       }
     } catch (error: any) {
       setAlert({
@@ -115,7 +116,7 @@ export function VerifyEmail() {
         message: error?.message || "Error inviting to channel.",
       });
 
-      setChannelInvited(false);
+      // setChannelInvited(false);
     }
   }
 
@@ -146,7 +147,8 @@ export function VerifyEmail() {
           </p>
           <div className="space-y-3">
             {availableChannels.map((channel) => {
-              const isMember = channels?.find((c: any) => c.id === channel);
+              // const isMember = channels?.find((c: any) => c.id === channel);
+
               return (
                 <div
                   key={channel}
